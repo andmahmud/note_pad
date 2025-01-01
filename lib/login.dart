@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:note_pad/notepad.dart';
 import 'package:note_pad/signup.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -38,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         final data = jsonDecode(response.body);
         final token = data['token'];
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
             builder: (context) => NotepadPage(token: token),

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class NotepadPage extends StatefulWidget {
   final String token;
 
-  NotepadPage({required this.token});
+  const NotepadPage({super.key, required this.token});
 
   @override
+  // ignore: library_private_types_in_public_api
   _NotepadPageState createState() => _NotepadPageState();
 }
 
