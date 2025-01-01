@@ -7,15 +7,22 @@ class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignUpPageState createState() => _SignUpPageState();
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(text: 'eve.holt@reqres.in');
+  final _passwordController = TextEditingController(text: 'password123');
+  bool _isPasswordVisible = false;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> _signUp(String email, String password) async {
     setState(() {
@@ -45,12 +52,12 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       } else {
         setState(() {
-          _errorMessage = 'Registration failed. Please check your credentials.';
+          _errorMessage = 'Registration failed. Please try again.';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Something went wrong. Please try again later.';
+        _errorMessage = 'Something went wrong: $e';
       });
     } finally {
       setState(() {
@@ -70,12 +77,28 @@ class _SignUpPageState extends State<SignUpPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+              ),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+              obscureText: !_isPasswordVisible,
             ),
             SizedBox(height: 20),
             if (_errorMessage != null)
@@ -87,17 +110,13 @@ class _SignUpPageState extends State<SignUpPage> {
             _isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: () {
-                      final email = _emailController.text.trim();
-                      final password = _passwordController.text.trim();
-                      if (email.isNotEmpty && password.isNotEmpty) {
-                        _signUp(email, password);
-                      } else {
-                        setState(() {
-                          _errorMessage = 'Email and Password cannot be empty.';
-                        });
-                      }
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            final email = _emailController.text;
+                            final password = _passwordController.text;
+                            _signUp(email, password);
+                          },
                     child: Text('Sign Up'),
                   ),
           ],

@@ -8,14 +8,15 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(text: 'eve.holt@reqres.in');
+  final _passwordController = TextEditingController(text: 'password123');
+
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
   String? _errorMessage;
 
   Future<void> _login(String email, String password) async {
@@ -36,8 +37,8 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final token = data['token'];
+
         Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
             builder: (context) => NotepadPage(token: token),
@@ -74,8 +75,22 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+              obscureText: !_isPasswordVisible,
             ),
             SizedBox(height: 20),
             if (_errorMessage != null)
@@ -87,22 +102,26 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: () {
-                      final email = _emailController.text.trim();
-                      final password = _passwordController.text.trim();
-                      if (email.isNotEmpty && password.isNotEmpty) {
-                        _login(email, password);
-                      }
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text.trim();
+                            if (email.isNotEmpty && password.isNotEmpty) {
+                              _login(email, password);
+                            }
+                          },
                     child: Text('Login'),
                   ),
             TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                );
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                      );
+                    },
               child: Text('Don’t have an account? Sign Up'),
             ),
           ],
